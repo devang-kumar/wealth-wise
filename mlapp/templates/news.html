@@ -1,0 +1,53 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Financial News</title>
+  <link rel="stylesheet" href="{% static 'css/news.css' %}">
+</head>
+<body>
+  <div class="container">
+    <h2>Latest Financial News</h2>
+    <div id="news-container" class="news-grid">
+      <p class="message">Loading news...</p>
+    </div>
+  </div>
+
+  <script>
+    const API_KEY = 'pub_602432d5a8d28d956ce1e28a806022231ce83';  // 🔁 Replace with your NewsData.io API key
+    const endpoint = `https://newsdata.io/api/1/news?apikey=${API_KEY}&q=finance&country=in&language=en&category=business`;
+
+    fetch(endpoint)
+      .then(res => res.json())
+      .then(data => {
+        const container = document.getElementById('news-container');
+        container.innerHTML = '';
+
+        if (data.results && data.results.length > 0) {
+          data.results.forEach(article => {
+            const card = document.createElement('div');
+            card.className = 'news-card';
+
+            card.innerHTML = `
+              <img src="${article.image_url || 'https://via.placeholder.com/400x200?text=No+Image'}" alt="News Image">
+              <div class="news-content">
+                <div class="news-title">${article.title}</div>
+                <div class="news-desc">${article.description || ''}</div>
+                <a href="${article.link}" class="read-more" target="_blank">Read More</a>
+              </div>
+            `;
+
+            container.appendChild(card);
+          });
+        } else {
+          container.innerHTML = '<p class="message">No news articles found.</p>';
+        }
+      })
+      .catch(err => {
+        console.error("Error fetching news:", err);
+        document.getElementById('news-container').innerHTML = '<p class="message">Failed to fetch news.</p>';
+      });
+  </script>
+</body>
+</html>

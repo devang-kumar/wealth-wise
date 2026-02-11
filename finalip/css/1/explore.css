@@ -1,0 +1,84 @@
+/* Stock cards */
+.stock-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 100%;
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.stock-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+}
+
+.symbol-icon {
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    padding: 0.5rem;
+    display: inline-flex;
+}
+
+.stock-info small {
+    font-size: 0.75rem;
+    color: #6c757d;
+    display: block;
+    line-height: 1.4;
+}
+
+/* Badges */
+.badge {
+    display: inline-block;
+    padding: 0.25em 0.4em;
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+}
+
+.bg-success { background-color: #28a745; }
+.bg-danger { background-color: #dc3545; }
+
+/* Search and filter */
+.search-container {
+    position: relative;
+    margin-right: 1rem;
+}
+
+.search-container i {
+    position: absolute;
+    top: 50%;
+    left: 0.75rem;
+    transform: translateY(-50%);
+    color: #6c757d;
+}
+
+#stockSearch {
+    padding-left: 2rem;
+    border-radius: 20px;
+}
+
+#filterSelect {
+    border-radius: 20px;
+}
+
+/* Grid layout */
+#stockGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #stockGrid {
+        grid-template-columns: 1fr;
+    }
+}

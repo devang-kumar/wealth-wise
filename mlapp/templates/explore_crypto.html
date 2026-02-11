@@ -1,0 +1,105 @@
+{% extends 'mlapp/base.html' %}
+{% block content %}
+<style>
+  .crypto-container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+  }
+
+  .search-bar {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px;
+    font-size: 16px;
+    margin: 0 auto 30px auto;
+    display: block;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 16px;
+    border-radius: 10px;
+    text-decoration: none;
+    color: #333;
+    transition: box-shadow 0.3s ease;
+  }
+
+  .card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .card img {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    margin-bottom: 10px;
+  }
+
+  .card h3 {
+    font-size: 18px;
+    margin: 5px 0;
+  }
+
+  .card p {
+    font-size: 14px;
+    margin: 2px 0;
+  }
+
+  .card .label {
+    font-weight: bold;
+  }
+
+  .center-text {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+</style>
+
+<div class="crypto-container">
+  <h2 class="center-text">Top Cryptocurrencies</h2>
+  <input
+    type="text"
+    id="searchInput"
+    class="search-bar"
+    placeholder="Search by name or symbol..."
+  >
+
+  <div id="cryptoGrid" class="grid">
+    {% for coin in coins %}
+      <a href="{% url 'crypto_detail' coin.symbol %}" class="card coin-card">
+        <img src="{{ coin.image }}" alt="{{ coin.name }}">
+        <h3>{{ coin.name }} ({{ coin.symbol }})</h3>
+        <p><span class="label">Rank:</span> {{ coin.market_cap_rank }}</p>
+        <p><span class="label">💰 Price:</span> ${{ coin.price|floatformat:2 }}</p>
+        <p><span class="label">📊 Market Cap:</span> ${{ coin.market_cap|floatformat:0 }}</p>
+        <!-- <p><span class="label">📈 24h Change:</span> {{ coin.price_change_percentage_24h|floatformat:2 }}%</p>
+        <p><span class="label">📉 Volume:</span> ₹{{ coin.total_volume|floatformat:0 }}</p> -->
+      </a>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  const searchInput = document.getElementById("searchInput");
+  const coinCards = document.querySelectorAll(".coin-card");
+
+  searchInput.addEventListener("input", function () {
+    const query = this.value.toLowerCase();
+    coinCards.forEach(card => {
+      const text = card.textContent.toLowerCase();
+      card.style.display = text.includes(query) ? "block" : "none";
+    });
+  });
+</script>
+{% endblock %}

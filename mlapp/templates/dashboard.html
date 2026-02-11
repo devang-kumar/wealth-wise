@@ -1,0 +1,145 @@
+
+{% load static %}
+{% load humanize %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<div class="dashboard-container">
+    <!-- Navigation (preserved as requested) -->
+    <nav class="dashboard-nav">
+        <div class="nav-brand">
+            <i class="fas fa-chart-line"></i>
+            <span>FinancePredictor</span>
+        </div>
+        <div class="nav-links">
+            <a href="{% url 'dashboard' %}" class="active"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="{% url 'predict' %}"><i class="fas fa-calculator"></i> Predict</a>
+            <a href="{% url 'history' %}"><i class="fas fa-history"></i> History</a>
+            <a href="{% url 'insights' %}"><i class="fas fa-chart-pie"></i> Insights</a>
+                <a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt me-1"></i> Logout</a>
+
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <header class="dashboard-header">
+            <h1>Welcome back, {{ request.user.first_name|default:"User" }}!</h1>
+            <p class="subheader">Here's your financial overview</p>
+        </header>
+
+        <section class="summary-cards">
+            <div class="summary-card green">
+                <div class="card-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <div class="card-content">
+                    <p class="subtitle">Total Predictions</p>
+                    <h2>{{ total_predictions }}</h2>
+                    <p class="card-trend">
+                        <i class="fas fa-arrow-up"></i> 12% from last month
+                    </p>
+                </div>
+            </div>
+            
+            <div class="summary-card blue">
+                <div class="card-icon">
+                    <i class="fas fa-piggy-bank"></i>
+                </div>
+                <div class="card-content">
+                    <p class="subtitle">Avg Savings %</p>
+                    <h2>
+                        {% if avg_savings %}{{ avg_savings|floatformat:2 }}%{% else %}N/A{% endif %}
+                    </h2>
+                    <p class="card-trend">
+                        <i class="fas fa-arrow-up"></i> 3.2% improvement
+                    </p>
+                </div>
+            </div>
+            
+            <div class="summary-card purple">
+                <div class="card-icon">
+                    <i class="fas fa-rupee-sign"></i>
+                </div>
+                <div class="card-content">
+                    <p class="subtitle">Total Savings</p>
+                    <h2>
+                        {% if total_savings %}₹{{ total_savings|intcomma }}{% else %}N/A{% endif %}
+                    </h2>
+                    <p class="card-trend">
+                        <i class="fas fa-arrow-up"></i> 8% increase
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section class="recent-predictions">
+            <div class="section-header">
+                <h3><i class="fas fa-clock"></i> Recent Predictions</h3>
+                <a href="{% url 'history' %}" class="view-all">View All <i class="fas fa-chevron-right"></i></a>
+            </div>
+            
+            {% if predictions %}
+            <div class="table-container">
+                <table class="predictions-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Income</th>
+                            <th>Spending</th>
+                            <th>Savings</th>
+                            <th>%</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pred in predictions %}
+                        <tr>
+                            <td>
+                                <div class="date-cell">
+                                    <span class="date-day">{{ pred.created_at|date:"d" }}</span>
+                                    <span class="date-month">{{ pred.created_at|date:"M" }}</span>
+                                </div>
+                            </td>
+                            <td>₹{{ pred.monthly_income|intcomma }}</td>
+                            <td>₹{{ pred.predicted_spending|intcomma }}</td>
+                            <td class="highlight">₹{{ pred.predicted_savings|intcomma }}</td>
+                            <td class="{% if pred.savings_percentage > 20 %}positive{% else %}neutral{% endif %}">
+                                {{ pred.savings_percentage|floatformat:2 }}%
+                            </td>
+                            <td>
+                                <span class="status-badge {% if pred.savings_percentage > 20 %}success{% elif pred.savings_percentage > 10 %}warning{% else %}danger{% endif %}">
+                                    {% if pred.savings_percentage > 20 %}Excellent
+                                    {% elif pred.savings_percentage > 10 %}Good
+                                    {% else %}Needs work{% endif %}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fas fa-chart-line"></i>
+                <h4>No predictions yet</h4>
+                <p>Start by making your first financial prediction</p>
+                <a href="{% url 'predict' %}" class="action-btn primary">
+                    <i class="fas fa-plus"></i> New Prediction
+                </a>
+            </div>
+            {% endif %}
+        </section>
+    </div>
+<script>
+    // Simple animation for cards on load
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.summary-card, .card');
+        cards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+    });
+</script>
+{% endblock %}

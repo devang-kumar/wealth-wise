@@ -1,0 +1,133 @@
+{% extends 'mlapp/base.html' %}
+{% load static %}
+
+{% block title %}Explore Stocks{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/explore.css' %}">
+<style>
+    .stock-card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .stock-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    }
+    .stock-info small {
+        font-size: 0.75rem;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">Market Overview</h2>
+            <div class="d-flex gap-2">
+                <div class="search-container position-relative">
+                    <input type="text" id="stockSearch" class="form-control ps-4"
+                            oninput="filterCards()">
+                    <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
+                </div>
+                <select id="filterSelect" class="form-select" onchange="onFilterChange()">
+                    <option value="actives" {% if current_filter == 'actives' %}selected{% endif %}>Most Active</option>
+                    <option value="gainers" {% if current_filter == 'gainers' %}selected{% endif %}>Top Gainers</option>
+                    <option value="losers" {% if current_filter == 'losers' %}selected{% endif %}>Top Losers</option>
+                </select>
+            </div>
+        </div>
+        <div class="row g-3" id="stockGrid">
+            {% for s in page_obj %}
+            <div class="col-md-4 col-lg-3">
+                <a href="{% url 'stock_detail' s.symbol %}" class="card h-100 stock-card text-decoration-none"
+                   data-symbol="{{ s.symbol|upper }}" data-name="{{ s.name|lower }}">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="symbol-icon bg-light rounded p-2 me-3">
+                                <img src="https://financialmodelingprep.com/image-stock/{{ s.symbol }}.png"
+                                     alt="{{ s.symbol }}" width="32" height="32"
+                                     onerror="this.src='{% static 'img/default-stock.png' %}'">
+                            </div>
+                            <div>
+                                <h5 class="mb-0">{{ s.symbol }}</h5>
+                                <small class="text-muted">{{ s.exchange }}</small>
+                            </div>
+                        </div>
+                        <p class="stock-name text-muted mb-2">{{ s.name|truncatechars:40 }}</p>
+
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h4 class="mb-0">${{ s.price }}</h4>
+                            <span class="badge {% if s.change >= 0 %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ s.change }}%
+                            </span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info">No stocks found for this filter.</div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if page_obj.has_other_pages %}
+        <nav class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}&filter={{ current_filter }}">Previous</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                {% endif %}
+
+                {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+                {% else %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ num }}&filter={{ current_filter }}">{{ num }}</a>
+                </li>
+                {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}&filter={{ current_filter }}">Next</a>
+                </li>
+                {% else %}
+                <li class="page-item disabled"><span class="page-link">Next</span></li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function onFilterChange(){
+    const f = document.getElementById('filterSelect').value;
+    const url = new URL(window.location);
+    url.searchParams.set('filter', f);
+    url.searchParams.delete('page');  // reset to page 1 when filter changes
+    window.location = url;
+}
+
+function filterCards(){
+    const q = document.getElementById('stockSearch').value.trim().toLowerCase();
+    const cards = document.querySelectorAll('#stockGrid .stock-card');
+
+    cards.forEach(card => {
+        const sym = card.dataset.symbol.toLowerCase();
+        const name = card.dataset.name;
+        const match = !q || sym.includes(q) || name.includes(q);
+        card.closest('.col-md-4').style.display = match ? 'block' : 'none';
+    });
+}
+</script>
+{% endblock %}

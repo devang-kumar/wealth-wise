@@ -1,0 +1,167 @@
+{% extends 'mlapp/base.html' %}
+{% load static %}
+
+{% block title %}SIP Calculator{% endblock %}
+{% block content %}
+<div class="sip-container">
+  <h2>SIP & Lumpsum Calculator</h2>
+  <div class="tab-switch">
+    <button id="sipTab" class="active">SIP</button>
+    <button id="lumpsumTab">Lumpsum</button>
+  </div>
+
+  <div class="overall">
+    <div class="child" id="marg">
+      <div id="sipForm">
+        <div class="input-group">
+          <label for="monthly">Monthly investment</label>
+          <input type="number" id="monthly" value="42016" />
+          <input type="range" id="monthlyRange" min="500" max="100000" value="42016" />
+        </div>
+      </div>
+
+      <div id="lumpsumForm" style="display: none;">
+        <div class="input-group">
+          <label for="lumpsumAmount">Total investment</label>
+          <input type="number" id="lumpsumAmount" value="500000" />
+          <input type="range" id="lumpsumRange" min="10000" max="10000000" value="500000" />
+        </div>
+      </div>
+
+      <div class="input-group">
+        <label for="rate">Expected return rate (p.a)</label>
+        <input type="number" id="rate" value="8" />
+        <input type="range" id="rateRange" min="1" max="30" value="8" />
+      </div>
+
+      <div class="input-group">
+        <label for="years">Time period (years)</label>
+        <input type="number" id="years" value="14" />
+        <input type="range" id="yearRange" min="1" max="30" value="14" />
+      </div>
+    </div>
+
+    <div class="child">
+      <canvas id="chart"></canvas>
+    </div>
+  </div>
+
+  <div class="cont">
+    <div class="legend">
+      <span><span class="dot" style="background-color: #e5e9ff;"></span> Invested amount</span>
+      <span><span class="dot" style="background-color: #4b6fff;"></span> Est. returns</span>
+    </div>
+
+    <div class="results">
+      <p>Invested amount: ₹<span id="invested">0</span></p>
+      <p>Est. returns: ₹<span id="returns">0</span></p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const sipTab = document.getElementById("sipTab");
+  const lumpsumTab = document.getElementById("lumpsumTab");
+  const sipForm = document.getElementById("sipForm");
+  const lumpsumForm = document.getElementById("lumpsumForm");
+
+  const monthly = document.getElementById("monthly");
+  const monthlyRange = document.getElementById("monthlyRange");
+  const lumpsumAmount = document.getElementById("lumpsumAmount");
+  const lumpsumRange = document.getElementById("lumpsumRange");
+  const rate = document.getElementById("rate");
+  const years = document.getElementById("years");
+  const rateRange = document.getElementById("rateRange");
+  const yearRange = document.getElementById("yearRange");
+  const investedText = document.getElementById("invested");
+  const returnsText = document.getElementById("returns");
+
+  let mode = "sip";
+
+  const ctx = document.getElementById("chart").getContext("2d");
+  const chart = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: ["Invested", "Returns"],
+      datasets: [{
+        data: [0, 0],
+        backgroundColor: ["#e5e9ff", "#4b6fff"],
+        borderWidth: 1,
+      }],
+    },
+    options: {
+      cutout: "70%",
+      plugins: { legend: { display: false } },
+    },
+  });
+
+  function formatNumber(num) {
+    return num.toLocaleString("en-IN");
+  }
+
+  function calculate() {
+    const r = parseFloat(rate.value) / 100 / 12;
+    const n = parseInt(years.value) * 12;
+
+    let totalInvested = 0;
+    let futureValue = 0;
+
+    if (mode === "sip") {
+      const P = parseFloat(monthly.value);
+      totalInvested = P * n;
+      futureValue = P * ((Math.pow(1 + r, n) - 1) / r) * (1 + r);
+    } else {
+      const L = parseFloat(lumpsumAmount.value);
+      totalInvested = L;
+      futureValue = L * Math.pow(1 + r, n);
+    }
+
+    const returns = futureValue - totalInvested;
+
+    chart.data.datasets[0].data = [totalInvested, returns];
+    chart.update();
+
+    investedText.textContent = formatNumber(Math.round(totalInvested));
+    returnsText.textContent = formatNumber(Math.round(returns));
+  }
+
+  function bindSync(input, slider) {
+    input.addEventListener("input", () => {
+      slider.value = input.value;
+      calculate();
+    });
+    slider.addEventListener("input", () => {
+      input.value = slider.value;
+      calculate();
+    });
+  }
+
+  bindSync(monthly, monthlyRange);
+  bindSync(lumpsumAmount, lumpsumRange);
+  bindSync(rate, rateRange);
+  bindSync(years, yearRange);
+
+  sipTab.addEventListener("click", () => {
+    mode = "sip";
+    sipForm.style.display = "block";
+    lumpsumForm.style.display = "none";
+    sipTab.classList.add("active");
+    lumpsumTab.classList.remove("active");
+    calculate();
+  });
+
+  lumpsumTab.addEventListener("click", () => {
+    mode = "lumpsum";
+    sipForm.style.display = "none";
+    lumpsumForm.style.display = "block";
+    lumpsumTab.classList.add("active");
+    sipTab.classList.remove("active");
+    calculate();
+  });
+
+  calculate();
+</script>
+{% endblock %}

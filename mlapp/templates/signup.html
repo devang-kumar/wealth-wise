@@ -1,0 +1,146 @@
+{% extends 'mlapp/base.html' %}
+{% load static %}
+{% block content %}
+<div class="form-container" style="max-width: 400px; margin: 50px auto; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); background-color: #ffffff;">
+    <h2 style="text-align: center; margin-bottom: 20px; color: #333;">Sign Up</h2>
+    
+    <div id="error-message" class="error" style="color: red; margin-bottom: 15px; text-align: center; display: none;"></div>
+
+    <form id="signup-form" method="POST">
+        {% csrf_token %}
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="username" name="username" placeholder="Username" required 
+                style="width: 100%; padding: 10px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px;">
+            <div id="username-error" style="color: red; font-size: 12px; margin-top: 5px; display: none;"></div>
+        </div>
+        
+        <div style="margin-bottom: 5px; position: relative;">
+            <input type="password" id="password" name="password" placeholder="Password" required 
+                style="width: 100%; padding: 10px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px;">
+            <span id="toggle-password" style="position: absolute; right: 10px; top: 10px; cursor: pointer;">
+                <i class="fas fa-eye"></i>
+            </span>
+        </div>
+        <div id="password-strength" style="font-size: 14px; margin-bottom: 15px;"></div>
+        
+        <button type="submit" id="submitBtn" 
+            style="width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;">
+            <span id="button-text">Sign Up</span>
+            <div id="spinner" style="display: none;">
+                <i class="fas fa-spinner fa-spin"></i> Processing...
+            </div>
+        </button>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get DOM elements
+    const signupForm = document.getElementById('signup-form');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const togglePassword = document.getElementById('toggle-password');
+    const strengthDisplay = document.getElementById('password-strength');
+    const submitBtn = document.getElementById('submitBtn');
+    const buttonText = document.getElementById('button-text');
+    const spinner = document.getElementById('spinner');
+    const errorMessage = document.getElementById('error-message');
+    const usernameError = document.getElementById('username-error');
+
+    // Password visibility toggle
+    togglePassword.addEventListener('click', function() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+    });
+
+    // Password strength indicator
+    passwordInput.addEventListener('input', function() {
+        const val = passwordInput.value;
+        if (val.length === 0) {
+            strengthDisplay.textContent = "";
+        } else if (val.length < 6) {
+            strengthDisplay.textContent = "Weak password (min 6 characters)";
+            strengthDisplay.style.color = "red";
+        } else if (val.match(/[A-Z]/) && val.match(/[0-9]/) && val.match(/[^A-Za-z0-9]/) && val.length >= 8) {
+            strengthDisplay.textContent = "Strong password";
+            strengthDisplay.style.color = "green";
+        } else if (val.length >= 8) {
+            strengthDisplay.textContent = "Good password (add numbers/symbols)";
+            strengthDisplay.style.color = "orange";
+        } else {
+            strengthDisplay.textContent = "Moderate password";
+            strengthDisplay.style.color = "orange";
+        }
+    });
+
+    // Form validation
+    signupForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Reset errors
+        errorMessage.style.display = 'none';
+        usernameError.style.display = 'none';
+        
+        // Validate inputs
+        let isValid = true;
+        const username = usernameInput.value.trim();
+        const password = passwordInput.value;
+        
+        if (!username) {
+            usernameError.textContent = 'Username is required';
+            usernameError.style.display = 'block';
+            isValid = false;
+        } else if (username.length < 3) {
+            usernameError.textContent = 'Username must be at least 3 characters';
+            usernameError.style.display = 'block';
+            isValid = false;
+        }
+        
+        if (!password) {
+            strengthDisplay.textContent = 'Password is required';
+            strengthDisplay.style.color = 'red';
+            isValid = false;
+        } else if (password.length < 6) {
+            strengthDisplay.textContent = 'Password must be at least 6 characters';
+            strengthDisplay.style.color = 'red';
+            isValid = false;
+        }
+        
+        if (!isValid) return;
+        
+        // Show loading state
+        buttonText.style.display = 'none';
+        spinner.style.display = 'block';
+        submitBtn.disabled = true;
+        
+        // Simulate form submission (replace with actual AJAX call if needed)
+        setTimeout(() => {
+            // This is where you would normally make an AJAX call
+            // For demonstration, we'll just submit the form normally
+            signupForm.submit();
+        }, 1500);
+    });
+
+    // Clear errors when typing
+    usernameInput.addEventListener('input', function() {
+        usernameError.style.display = 'none';
+    });
+    
+    passwordInput.addEventListener('input', function() {
+        if (passwordInput.value.length > 0) {
+            strengthDisplay.style.display = 'block';
+        }
+    });
+
+    // Check if there's an error from server-side
+    {% if error %}
+        errorMessage.textContent = '{{ error }}';
+        errorMessage.style.display = 'block';
+    {% endif %}
+});
+</script>
+
+<!-- Include Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}

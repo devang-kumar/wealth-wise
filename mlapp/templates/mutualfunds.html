@@ -1,0 +1,97 @@
+{% extends 'mlapp/base.html' %}
+{% block content %}
+<style>
+  .mutual-fund-container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 20px;
+  }
+
+  .search-bar {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px;
+    font-size: 16px;
+    margin: 0 auto 30px auto;
+    display: block;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+
+  .card {
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 16px;
+    border-radius: 10px;
+    color: #333;
+    transition: box-shadow 0.3s ease;
+  }
+
+  .card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .card h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  .card p {
+    font-size: 14px;
+    margin: 5px 0;
+  }
+
+  .label {
+    font-weight: bold;
+  }
+
+  .center-text {
+    text-align: center;
+    font-size: 24px;
+    margin-bottom: 20px;
+  }
+</style>
+
+<div class="mutual-fund-container">
+  <h2 class="center-text">Top Mutual Funds</h2>
+  <input
+    type="text"
+    id="searchInput"
+    class="search-bar"
+    placeholder="Search by fund name..."
+  >
+
+  <div id="fundGrid" class="grid">
+    {% for fund in funds %}
+      <div class="card fund-card">
+        <h3>{{ fund.name }}</h3>
+        <p><span class="label">AMC:</span> {{ fund.amc }}</p>
+        <p><span class="label">Type:</span> {{ fund.fund_type }}</p>
+        <p><span class="label">Category:</span> {{ fund.category }}</p>
+        <p><span class="label">NAV:</span> ₹{{ fund.nav }}</p>
+        <p><span class="label">Date:</span> {{ fund.date }}</p>
+        <p><span class="label">1Y Return:</span> {{ fund.return_1y }}</p>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+
+<script>
+  const searchInput = document.getElementById("searchInput");
+  const fundCards = document.querySelectorAll(".fund-card");
+
+  searchInput.addEventListener("input", function () {
+    const query = this.value.toLowerCase();
+    fundCards.forEach(card => {
+      const text = card.textContent.toLowerCase();
+      card.style.display = text.includes(query) ? "block" : "none";
+    });
+  });
+</script>
+{% endblock %}
