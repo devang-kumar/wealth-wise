@@ -1,0 +1,153 @@
+:root {
+  --primary: #3A80BA;
+  --primary-light: rgba(58, 128, 186, 0.1);
+  --secondary: #4CB5F5;
+  --success: #28a745;
+  --danger: #dc3545;
+  --gray: #6c757d;
+  --light: #f8f9fa;
+  --dark: #343a40;
+  --bg-color: #f4f6f8;
+  --card-bg: #ffffff;
+}
+
+body {
+  background-color: var(--bg-color);
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  padding: 2rem;
+}
+
+.sip-container {
+  background: var(--card-bg);
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  max-width: 1200px;
+  margin: auto;
+  border: 2px solid black;
+}
+
+.sip-container h2 {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 2rem;
+  color: var(--primary);
+}
+
+.tab-switch {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.tab-switch button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  background: #eee;
+  color: #777;
+  transition: all 0.2s ease;
+}
+
+.tab-switch .active {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.overall {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: space-between;
+}
+
+.child {
+  flex: 1 1 48%;
+}
+
+.input-group {
+  margin-bottom: 1.5rem;
+}
+
+.input-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  color: var(--dark);
+}
+
+.input-group input[type="number"],
+.input-group select {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-sizing: border-box;
+  margin-bottom: 0.5rem;
+}
+
+.input-group input[type="range"] {
+  width: 100%;
+  accent-color: var(--primary);
+}
+
+canvas {
+  max-width: 100%;
+  margin-top: 1rem;
+}
+
+.cont {
+  margin-top: 2rem;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  padding: 1.5rem;
+  background: #fff;
+}
+
+.legend {
+  text-align: center;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+  color: var(--gray);
+}
+
+.legend .dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 5px;
+  vertical-align: middle;
+}
+
+.results {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--dark);
+}
+
+.results p {
+  margin: 0.5rem 0;
+}
+
+.results span {
+  font-weight: bold;
+  color: var(--primary);
+}
+
+@media (max-width: 768px) {
+  .overall {
+    flex-direction: column;
+  }
+
+  .child {
+    width: 100%;
+  }
+}
