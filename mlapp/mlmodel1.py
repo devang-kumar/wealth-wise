@@ -4,8 +4,12 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import LabelEncoder
 import joblib
 
+import os
+from django.conf import settings
+
 # Load and preprocess dataset
-df = pd.read_csv(r"C:\Users\devan\Desktop\ip testing\investment_survey.csv")
+csv_path = os.path.join(settings.BASE_DIR, 'investment_survey.csv')
+df = pd.read_csv(csv_path)
 df.columns = df.columns.str.strip().str.replace(r'[^a-zA-Z0-9_]', '_', regex=True)
 df.dropna(axis=1, how='all', inplace=True)
 df.drop([col for col in ['Motivation_cause', 'Resources_used'] if col in df.columns], axis=1, inplace=True)

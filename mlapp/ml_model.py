@@ -6,6 +6,7 @@ from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import LabelEncoder
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, r2_score
+from django.conf import settings
 
 # Initialize model components
 encoder = None
@@ -14,8 +15,8 @@ best_model = None
 def initialize_model():
     global encoder, best_model
     
-    model_path = 'mlapp/ml_model.joblib'
-    encoder_path = 'mlapp/encoder.joblib'
+    model_path = os.path.join(settings.BASE_DIR, 'mlapp', 'ml_model.joblib')
+    encoder_path = os.path.join(settings.BASE_DIR, 'mlapp', 'encoder.joblib')
     
     # Try to load saved model if exists
     if os.path.exists(model_path) and os.path.exists(encoder_path):
@@ -29,7 +30,8 @@ def initialize_model():
     
     try:
         # Load and prepare data
-        data = pd.read_csv(r"C:\Users\devan\Desktop\python\ip test\income_expenditure.csv")
+        data_path = os.path.join(settings.BASE_DIR, 'income_expenditure.csv')
+        data = pd.read_csv(data_path)
         
         # Encode categorical features
         encoder = LabelEncoder()
