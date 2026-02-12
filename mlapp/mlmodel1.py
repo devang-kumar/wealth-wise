@@ -19,12 +19,12 @@ df.replace(missing_values, np.nan, inplace=True)
 
 for col in df.columns:
     if df[col].isna().any():
-        if df[col].dtype == 'object':
+        if pd.api.types.is_numeric_dtype(df[col]):
+            median_value = df[col].median()
+            df[col] = df[col].fillna(median_value)
+        else:
             mode_values = df[col].mode()
             df[col] = df[col].fillna(mode_values[0] if not mode_values.empty else 'Unknown')
-        else:
-            median_value = df[col].median() if not df[col].isna().all() else 0
-            df[col] = df[col].fillna(median_value)
 
 le_dict = {}
 for col in df.columns:
