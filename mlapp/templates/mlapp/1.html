@@ -1,0 +1,23 @@
+{% extends 'mlapp/base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/explore.css' %}">
+
+<div class="explore-container">
+    <h1>Explore Stocks & Mutual Funds</h1>
+    <div class="search-bar">
+        <input type="text" placeholder="Search investments...">
+    </div>
+
+    <div class="grid-container">
+        {% for item in data %}
+        <div class="card">
+            <h3>{{ item.name }}</h3>
+            <p>Price: ₹{{ item.price }}</p>
+            <p>Change: {{ item.change }}%</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

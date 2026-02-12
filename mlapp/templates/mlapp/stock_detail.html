@@ -1,0 +1,153 @@
+{% extends 'mlapp/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ quote.symbol }} - {{ profile.companyName }}{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/explore.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="stock-detail-container">
+    <div class="stock-header mb-4">
+        <div class="d-flex align-items-center mb-3">
+            <div class="symbol-icon bg-light rounded p-3 me-3">
+                <img src="https://financialmodelingprep.com/image-stock/{{ quote.symbol }}.png"
+                     alt="{{ quote.symbol }}" width="48" height="48"
+                     onerror="this.src='{% static 'img/default-stock.png' %}'">
+            </div>
+            <div>
+                <h1 class="mb-0">{{ profile.companyName }}</h1>
+                <div class="d-flex align-items-center">
+                    <h3 class="mb-0 me-3">{{ quote.symbol }}</h3>
+                    <span class="badge bg-secondary">{{ quote.exchange }}</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="price-section">
+            <h2 class="current-price mb-0">${{ quote.price }}</h2>
+            <span class="price-change {% if quote.change >= 0 %}text-success{% else %}text-danger{% endif %}">
+                {{ quote.change }} ({{ quote.changesPercentage }})
+                <i class="fas fa-arrow-{% if quote.change >= 0 %}up{% else %}down{% endif %} ms-1"></i>
+            </span>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4 class="mb-0">Price Chart</h4>
+                    </div>
+                    <diV style="height: 700px; width:100%;">
+                    <canvas id="stockChart"></canvas>
+                    </diV>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h4 class="mb-4">Key Metrics</h4>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <span class="metric-label">Market Cap</span>
+                            <span class="metric-value">${{ profile.mktCap }}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Volume</span>
+                            <span class="metric-value">{{ quote.volume|intcomma }}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Sector</span>
+                            <span class="metric-value">{{ profile.sector }}</span>
+                        </div>
+                        <div class="metric-item">
+                            <span class="metric-label">Industry</span>
+                            <span class="metric-value">{{ profile.industry }}</span>
+                        </div>
+                    </div>
+                    
+                    <hr class="my-4">
+                    
+                    <h5 class="mb-3">About</h5>
+                    <p class="text-muted">{{ profile.description|default:"No description available." }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+let stockChart;
+
+document.addEventListener('DOMContentLoaded', function () {
+    const ctx = document.getElementById('stockChart').getContext('2d');
+
+    if (stockChart) {
+        stockChart.destroy();
+    }
+
+    stockChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_dates|safe }},
+            datasets: [{
+                label: '{{ quote.symbol }}',
+                data: {{ chart_closes|safe }},
+                borderColor: '#3A80BA',
+                backgroundColor: 'rgba(58, 128, 186, 0.1)',
+                borderWidth: 2,
+                pointRadius: 0,
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ₹${context.parsed.y.toFixed(2)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    display: false,
+                    grid: { display: false }
+                },
+                y: {
+                    beginAtZero: false,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)',
+                        drawBorder: false
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + value;
+                        }
+                    }
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            }
+        }
+    });
+});
+
+</script>
+{% endblock %}

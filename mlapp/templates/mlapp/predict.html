@@ -1,0 +1,138 @@
+{% extends 'mlapp/base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}Predict Finances{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/predict.css' %}">
+{% endblock %}
+{% block content %}
+<div class="dashboard-container" style="margin:20px;">
+    <div class="main">
+        <div class="card">
+            <div class="card-header">
+                <h4 class="mb-0"><i class="fas fa-calculator me-2"></i>Financial Prediction</h4>
+            </div>
+            <div class="card-body">
+                <form id="predictionForm" method="POST">
+                    {% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Monthly Income (₹)</label>
+                            <input type="number" class="form-control" name="monthly_income" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">EMI/Rent (₹)</label>
+                            <input type="number" class="form-control" name="emi_rent" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Annual Income (₹)</label>
+                            <input type="number" class="form-control" name="annual_income" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Earning Members</label>
+                            <input type="number" class="form-control" name="earning_members" required min="1">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Family Members</label>
+                            <input type="number" class="form-control" name="family_members" required min="1">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Highest Qualification</label>
+                            <select class="form-select" name="qualification" required>
+                                <option value="Graduate">Graduate</option>
+                                <option value="Post Graduate">Post Graduate</option>
+                                <option value="Professional">Professional</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn mt-4">
+                        <span id="submitText" style="background-color:#2c6a9a; padding:10px;border: 1px solid black; color: white;border-radius: 15px;">Predict Finances</span>
+                        <span id="spinner" class="spinner-border d-none" role="status"></span>
+                    </button>
+                </form>
+
+                <div id="result" class="mt-4 p-4 bg-light rounded" style="display:none;">
+                    <h5 class="mb-3"><i class="fas fa-chart-bar me-2"></i>Prediction Results</h5>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card border-danger mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-subtitle mb-2 text-muted">Predicted Spending</h6>
+                                    <h3 id="predictedSpending" class="card-title text-danger">₹0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-success mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-subtitle mb-2 text-muted">Predicted Savings</h6>
+                                    <h3 id="predictedSavings" class="card-title text-success">₹0</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card border-info mb-3">
+                                <div class="card-body">
+                                    <h6 class="card-subtitle mb-2 text-muted">Savings Percentage</h6>
+                                    <h3 id="savingsPercentage" class="card-title text-info">0%</h3>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('predictionForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const form = e.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const submitText = document.getElementById('submitText');
+    const spinner = document.getElementById('spinner');
+    const resultDiv = document.getElementById('result');
+
+    resultDiv.style.display = 'none';
+    submitBtn.disabled = true;
+    submitText.textContent = "Predicting...";
+    spinner.classList.remove('d-none');
+
+    try {
+        const formData = new FormData(form);
+        const response = await fetch("{% url 'predict_api' %}", {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': form.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || data.status !== 'success') {
+            throw new Error(data.message || 'Prediction failed');
+        }
+
+        document.getElementById('predictedSpending').textContent = '₹' + data.predicted_spending.toLocaleString('en-IN');
+        document.getElementById('predictedSavings').textContent = '₹' + data.predicted_savings.toLocaleString('en-IN');
+        document.getElementById('savingsPercentage').textContent = data.savings_percentage.toFixed(2) + '%';
+        resultDiv.style.display = 'block';
+
+    } catch (error) {
+        alert(`Error: ${error.message}`);
+    } finally {
+        submitText.textContent = "Predict Finances";
+        spinner.classList.add('d-none');
+        submitBtn.disabled = false;
+    }
+});
+</script>
+{% endblock %}

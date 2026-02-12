@@ -1,0 +1,168 @@
+{% extends 'mlapp/base.html' %}
+{% load static %}
+
+{% block title %}Smart Investment Advisor{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/investment.css' %}">
+
+<div class="investment-container">
+  <div class="investment-header">
+    <h1><i class="fas fa-chart-line"></i> Smart Investment Advisor</h1>
+    <p>Get personalized investment recommendations based on your profile</p>
+  </div>
+
+  <div class="investment-card">
+    <form method="post" class="investment-form">
+      {% csrf_token %}
+      
+      <div class="form-group">
+        <label for="gender">Gender</label>
+        <select class="form-control" id="gender" name="gender" required>
+          <option value="">Select Gender</option>
+          <option value="Male">Male</option>
+          <option value="Female">Female</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="age">Age</label>
+        <input type="number" id="age" name="age" min="18" max="100" placeholder="Enter your age" required>
+        <div class="input-hints">
+          <small>Common ages in dataset: 18-35 (most frequent: 22-28)</small>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="working_professional">Employment Status</label>
+        <select class="form-control" id="working_professional" name="working_professional" required>
+          <option value="">Select Status</option>
+          <option value="1">Working Professional (Common for ages 24+)</option>
+          <option value="0">Student/Not Working (Common for ages 18-23)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="annual_income">Annual Income (₹)</label>
+        <input type="number" id="annual_income" name="annual_income" min="0" step="1000" placeholder="e.g. 250000" required>
+      </div>
+
+      <div class="form-group">
+        <label for="investment_per_month">Monthly Investment (₹)</label>
+        <input type="number" id="investment_per_month" name="investment_per_month" min="100" step="100" placeholder="e.g. 5000" required>
+      </div>
+
+      <div class="form-group">
+        <label for="mode_of_investment">Preferred Investment Mode</label>
+        <select class="form-control" id="mode_of_investment" name="mode_of_investment">
+          <option value="">Select Preferred Mode (Optional)</option>
+          <option value="Banking - RD, FD">Banking (RD/FD)</option>
+          <option value="Stocks - Intraday, long term">Stocks (Intraday/Long-term)</option>
+          <option value="Mutual Funds">Mutual Funds</option>
+          <option value="Crypto currency">Cryptocurrency</option>
+          <option value="Gold / Any other Materialistic investment">Gold/Material Assets</option>
+          <option value="Real estate, Bonds">Real Estate/Bonds</option>
+          <option value="Marketing">Marketing</option>
+          <option value="Chit fund">Chit Fund</option>
+          <option value="Not prepared">Not Prepared</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="goal">Investment Goal</label>
+        <select class="form-control" id="goal" name="goal" required>
+          <option value="">Select Goal</option>
+          <option value="Wealth generation">Wealth Generation (Most Common)</option>
+          <option value="Personal Savings">Personal Savings</option>
+          <option value="Planning for finacial freedom after Retirement">Retirement Planning</option>
+          <option value="Children's education/ Marriage">Children's Education/Marriage</option>
+          <option value="Construction of own House / Buying a new Car">House/Car Purchase</option>
+          <option value="Regarding your / Your Siblings marriage">Sibling's Marriage</option>
+          <option value="Tax saving">Tax Saving</option>
+          <option value="All the above">All of the Above</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="duration">Investment Duration (Years)</label>
+        <input type="number" id="duration" name="duration" min="1" max="50" placeholder="e.g. 5 or 10" required>
+      </div>
+
+      <div class="form-group">
+        <label for="motivation">Motivation Source</label>
+        <select class="form-control" id="motivation" name="motivation">
+          <option value="">Select Motivation (Optional)</option>
+          <option value="Family member">Family Member (Most Common)</option>
+          <option value="Social media/ Articles">Social Media/Articles</option>
+          <option value="Friends">Friends</option>
+          <option value="Self Interest">Self Interest</option>
+          <option value="Through Bank">Bank</option>
+          <option value="Agents/Investment brokers">Agents/Brokers</option>
+          <option value="Self motivation">Self Motivation</option>
+          <option value="Schemes">Government Schemes</option>
+          <option value="No one">No Particular Influence</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="resources">Information Resources</label>
+        <select class="form-control" id="resources" name="resources">
+          <option value="">Select Resources (Optional)</option>
+          <option value="Family members/Friends">Family/Friends (Most Common)</option>
+          <option value="Mobile applications">Mobile Apps</option>
+          <option value="News articles / Current affairs">News/Current Affairs</option>
+          <option value="Books">Books</option>
+          <option value="Brokers">Brokers</option>
+          <option value="Investors in bank">Bank Investors</option>
+        </select>
+      </div>
+
+      <button type="submit" class="btn-recommend">
+        <i class="fas fa-lightbulb"></i> Get Recommendation
+      </button>
+    </form>
+  </div>
+
+  {% if submitted %}
+  <div class="results-card fade-in">
+    <div class="recommendation">
+      <h3><i class="fas fa-star"></i> Recommended Investment Mode</h3>
+      <div class="recommendation-badge">{{ recommended }}</div>
+      
+      <div class="probability-meter">
+        <h4>Prediction Confidence</h4>
+        <div class="meter">
+          <div class="meter-fill" style="width: {{ top_probability }}%"></div>
+        </div>
+        <span>{{ top_probability }}% confidence</span>
+      </div>
+    </div>
+
+    <div class="probability-table">
+      <h4><i class="fas fa-chart-pie"></i> All Options Analyzed</h4>
+      <table>
+        <thead>
+          <tr>
+            <th>Investment Type</th>
+            <th>Probability</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for label, prob in probabilities.items %}
+          <tr>
+            <td>{{ label }}</td>
+            <td>
+              <div class="probability-bar-container">
+                <div class="probability-bar" style="width: {{ prob }}%"></div>
+                <span>{{ prob }}%</span>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

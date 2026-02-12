@@ -1,0 +1,14 @@
+{% extends 'mlapp/base.html' %}
+{% block content %}
+<div style="max-width: 800px; margin: auto; padding: 20px;">
+  <h2>{{ fund.name }}</h2>
+  <img src="{{ fund.logo }}" alt="Logo" style="width: 80px; height: 80px; margin: 10px 0;">
+  <p><strong>Fund House:</strong> {{ fund.fund_house }}</p>
+  <p><strong>Category:</strong> {{ fund.category }}</p>
+  <p><strong>Type:</strong> {{ fund.type }}</p>
+  <p><strong>Start Date:</strong> {{ fund.start_date }}</p>
+  <p><strong>Latest NAV:</strong> ₹{{ fund.nav }}</p>
+  <p><strong>Date:</strong> {{ fund.date }}</p>
+  <a href="{% url 'mutual_fund_list' %}">← Back to List</a>
+</div>
+{% endblock %}

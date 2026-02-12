@@ -1,0 +1,48 @@
+{% extends 'mlapp/base.html' %}
+{% block content %}
+<h2 class="text-2xl font-bold mb-4">Details for {{ symbol }}</h2>
+
+{% if data %}
+<div class="bg-white p-6 rounded shadow-md">
+  <p><strong>Price:</strong> ${{ data.PRICE|floatformat:2 }}</p>
+  <p><strong>Market Cap:</strong> ${{ data.MKTCAP|floatformat:0 }}</p>
+  <p><strong>24h High:</strong> ${{ data.HIGH24HOUR|floatformat:2 }}</p>
+  <p><strong>24h Low:</strong> ${{ data.LOW24HOUR|floatformat:2 }}</p>
+  <p><strong>Change (24h):</strong> {{ data.CHANGEPCT24HOUR|floatformat:2 }}%</p>
+</div>
+
+<h3 class="text-xl font-semibold mt-6 mb-2">Price Chart (Last 7 Days)</h3>
+<canvas id="priceChart" width="600" height="300"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('priceChart').getContext('2d');
+  const priceChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: {{ labels|safe }},
+      datasets: [{
+        label: '{{ symbol }} Price (USD)',
+        data: {{ prices|safe }},
+        borderColor: 'rgb(75, 192, 192)',
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        tension: 0.3,
+        fill: true,
+        pointRadius: 3
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: false
+        }
+      }
+    }
+  });
+</script>
+{% else %}
+<p class="text-red-500">Failed to load data for {{ symbol }}</p>
+{% endif %}
+
+{% endblock %}

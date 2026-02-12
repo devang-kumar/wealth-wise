@@ -1,0 +1,118 @@
+{% extends 'mlapp/base.html' %}
+{% load static %}
+{% block content %}
+<div class="form-container" style="max-width: 400px; margin: 50px auto; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); background-color: #ffffff;">
+    <h2 style="text-align: center; margin-bottom: 20px; color: #333;">Login</h2>
+    
+    <div id="error-message" class="error" style="color: red; margin-bottom: 15px; text-align: center; display: none;"></div>
+
+    <form id="login-form" method="POST">
+        {% csrf_token %}
+        <div style="margin-bottom: 15px;">
+            <input type="text" id="username" name="username" placeholder="Username" required 
+                style="width: 100%; padding: 10px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px;">
+            <div id="username-error" style="color: red; font-size: 12px; margin-top: 5px; display: none;"></div>
+        </div>
+        <div style="margin-bottom: 20px; position: relative;">
+            <input type="password" id="password" name="password" placeholder="Password" required 
+                style="width: 100%; padding: 10px 15px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px;">
+            <span id="toggle-password" style="position: absolute; right: 10px; top: 10px; cursor: pointer;">
+                <i class="fas fa-eye"></i>
+            </span>
+            <div id="password-error" style="color: red; font-size: 12px; margin-top: 5px; display: none;"></div>
+        </div>
+        <button type="submit" id="login-button"
+            style="width: 100%; padding: 12px; background-color: #007bff; color: white; border: none; border-radius: 8px; font-size: 16px; cursor: pointer;">
+            <span id="button-text">Login</span>
+            <div id="spinner" style="display: none;">
+                <i class="fas fa-spinner fa-spin"></i> Processing...
+            </div>
+        </button>
+    </form>
+
+    <div style="margin-top: 20px; text-align: center; font-size: 14px;">
+        Don't have an account? 
+        <a href="{% url 'signup' %}" style="color: #007bff; text-decoration: none;">Sign up</a>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get DOM elements
+    const loginForm = document.getElementById('login-form');
+    const usernameInput = document.getElementById('username');
+    const passwordInput = document.getElementById('password');
+    const togglePassword = document.getElementById('toggle-password');
+    const loginButton = document.getElementById('login-button');
+    const buttonText = document.getElementById('button-text');
+    const spinner = document.getElementById('spinner');
+    const errorMessage = document.getElementById('error-message');
+    const usernameError = document.getElementById('username-error');
+    const passwordError = document.getElementById('password-error');
+
+    // Password visibility toggle
+    togglePassword.addEventListener('click', function() {
+        const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordInput.setAttribute('type', type);
+        this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+    });
+
+    // Form validation
+    loginForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Reset errors
+        errorMessage.style.display = 'none';
+        usernameError.style.display = 'none';
+        passwordError.style.display = 'none';
+        
+        // Validate inputs
+        let isValid = true;
+        
+        if (!usernameInput.value.trim()) {
+            usernameError.textContent = 'Username is required';
+            usernameError.style.display = 'block';
+            isValid = false;
+        }
+        
+        if (!passwordInput.value.trim()) {
+            passwordError.textContent = 'Password is required';
+            passwordError.style.display = 'block';
+            isValid = false;
+        }
+        
+        if (!isValid) return;
+        
+        // Show loading state
+        buttonText.style.display = 'none';
+        spinner.style.display = 'block';
+        loginButton.disabled = true;
+        
+        // Simulate form submission (replace with actual AJAX call if needed)
+        setTimeout(() => {
+            // This is where you would normally make an AJAX call
+            // For demonstration, we'll just submit the form normally
+            loginForm.submit();
+        }, 1500);
+    });
+
+    // Clear errors when typing
+    usernameInput.addEventListener('input', function() {
+        usernameError.style.display = 'none';
+    });
+    
+    passwordInput.addEventListener('input', function() {
+        passwordError.style.display = 'none';
+    });
+
+    // Check if there's an error from server-side
+    {% if error %}
+        errorMessage.textContent = '{{ error }}';
+        errorMessage.style.display = 'block';
+    {% endif %}
+});
+</script>
+
+<!-- Include Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
