@@ -28,7 +28,7 @@ for col in df.columns:
 
 le_dict = {}
 for col in df.columns:
-    if df[col].dtype == "object":
+    if not pd.api.types.is_numeric_dtype(df[col]):
         le = LabelEncoder()
         df[col] = le.fit_transform(df[col].astype(str))
         le_dict[col] = le
