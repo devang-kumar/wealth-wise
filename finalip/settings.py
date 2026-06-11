@@ -13,9 +13,13 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 import dj_database_url
-from pathlib import Path
+from dotenv import load_dotenv
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env file if it exists
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 FMP_API_KEY = 'wh0bXzDAlwn5Kl3iHMVwZyvh8EoO3F8a'
 
